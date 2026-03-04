@@ -1,5 +1,12 @@
-(function() {
-      // -------------------- بيانات الأشياء --------------------
+ (function() {
+      // منع التمرير عند لمس العناصر
+      document.body.addEventListener('touchmove', (e) => {
+        if (e.target.classList.contains('random-item') || e.target.closest('.random-item')) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      // بيانات الأشياء
       const randomItems = {
         car: { name: '🚗 سيارة', emoji: '🚗' },
         phone: { name: '📱 جوال', emoji: '📱' },
@@ -18,82 +25,48 @@
         ufo: { name: '🛸 طبق طائر', emoji: '🛸' }
       };
 
-      // -------------------- عناصر السلايدرات --------------------
+      // عناصر السلايدرات
       const bhSlider = document.getElementById('bhSlider');
       const nsSlider = document.getElementById('nsSlider');
       const whSlider = document.getElementById('whSlider');
       
-      const bhDistLabel = document.getElementById('bhDistanceLabel');
-      const nsDistLabel = document.getElementById('nsDistanceLabel');
-      const whDistLabel = document.getElementById('whDistanceLabel');
-      
-      const bhRedshift = document.getElementById('bhRedshift');
-      const bhTime = document.getElementById('bhTime');
-      const bhDistortion = document.getElementById('bhDistortion');
-      const bhRedshiftBar = document.getElementById('bhRedshiftBar');
-      
-      const nsRedshift = document.getElementById('nsRedshift');
-      const nsTime = document.getElementById('nsTime');
-      const nsDistortion = document.getElementById('nsDistortion');
-      const nsRedshiftBar = document.getElementById('nsRedshiftBar');
-      
-      const whRedshift = document.getElementById('whRedshift');
-      const whTime = document.getElementById('whTime');
-      const whDistortion = document.getElementById('whDistortion');
-      const whRedshiftBar = document.getElementById('whRedshiftBar');
+      // دوال التحديث (نفس الشيء لكن مختصرة)
+      function updateAll() {
+        // Black hole
+        let p = bhSlider.value / 100;
+        document.getElementById('bhRedshift').innerText = 'z=' + (0.1 + p * 4.5).toFixed(2);
+        document.getElementById('bhRedshiftBar').style.width = Math.min(100, ((0.1 + p * 4.5)/5)*100) + '%';
+        document.getElementById('bhTime').innerText = (1.0 - p * 0.8).toFixed(2) + 'x';
+        document.getElementById('bhDistortion').innerText = p < 0.3 ? 'خفيف' : p < 0.6 ? 'متوسط' : 'شديد';
+        document.getElementById('bhDistanceLabel').innerText = bhSlider.value + '%';
 
-      // -------------------- دوال التحديث (الازاحة) --------------------
-      function updateBlackHole(value) {
-        let p = value / 100;
-        let z = 0.1 + p * 4.5;
-        bhRedshift.innerText = 'z=' + z.toFixed(2);
-        bhRedshiftBar.style.width = Math.min(100, (z/5.0)*100) + '%';
-        let timeDil = 1.0 - p * 0.8;
-        if (timeDil < 0.15) timeDil = 0.15;
-        bhTime.innerText = timeDil.toFixed(2) + 'x';
-        let distort = p < 0.3 ? 'خفيف' : (p < 0.6 ? 'متوسط' : (p < 0.85 ? 'شديد' : 'مشوه جداً'));
-        bhDistortion.innerText = distort;
-        bhDistLabel.innerText = value + '%';
+        // Neutron
+        p = nsSlider.value / 100;
+        document.getElementById('nsRedshift').innerText = 'z=' + (0.15 + p * 2.2).toFixed(2);
+        document.getElementById('nsRedshiftBar').style.width = ((0.15 + p * 2.2) / 3.5 * 100) + '%';
+        document.getElementById('nsTime').innerText = (1.0 - p * 0.5).toFixed(2) + 'x';
+        document.getElementById('nsDistortion').innerText = p < 0.3 ? 'خفيف' : p < 0.6 ? 'نبض' : 'التواء';
+        document.getElementById('nsDistanceLabel').innerText = nsSlider.value + '%';
+
+        // White hole
+        p = whSlider.value / 100;
+        document.getElementById('whRedshift').innerText = 'z=' + (-0.05 - p * 0.4).toFixed(2);
+        document.getElementById('whRedshiftBar').style.width = (p * 100) + '%';
+        document.getElementById('whTime').innerText = (1.0 + p * 0.8).toFixed(2) + 'x';
+        document.getElementById('whDistortion').innerText = p < 0.3 ? 'طرد' : p < 0.6 ? 'انبعاج' : 'تمزق';
+        document.getElementById('whDistanceLabel').innerText = whSlider.value + '%';
       }
 
-      function updateNeutron(value) {
-        let p = value / 100;
-        let z = 0.15 + p * 2.2;
-        nsRedshift.innerText = 'z=' + z.toFixed(2);
-        nsRedshiftBar.style.width = (z / 3.5) * 100 + '%';
-        let timeDil = 1.0 - p * 0.5;
-        if (timeDil < 0.4) timeDil = 0.4;
-        nsTime.innerText = timeDil.toFixed(2) + 'x';
-        let distort = p < 0.3 ? 'خفيف' : (p < 0.6 ? 'نبض' : 'التواء');
-        nsDistortion.innerText = distort;
-        nsDistLabel.innerText = value + '%';
-      }
+      bhSlider.addEventListener('input', updateAll);
+      bhSlider.addEventListener('touchmove', updateAll);
+      nsSlider.addEventListener('input', updateAll);
+      nsSlider.addEventListener('touchmove', updateAll);
+      whSlider.addEventListener('input', updateAll);
+      whSlider.addEventListener('touchmove', updateAll);
+      updateAll();
 
-      function updateWhiteHole(value) {
-        let p = value / 100;
-        let blueshift = -0.05 - p * 0.4;
-        whRedshift.innerText = 'z=' + blueshift.toFixed(2);
-        let barWidth = p * 100;
-        whRedshiftBar.style.width = barWidth + '%';
-        let timeFactor = 1.0 + p * 0.8;
-        whTime.innerText = timeFactor.toFixed(2) + 'x';
-        let distort = p < 0.3 ? 'طرد' : (p < 0.6 ? 'انبعاج' : 'تمزق ضوئي');
-        whDistortion.innerText = distort;
-        whDistLabel.innerText = value + '%';
-      }
-
-      // ربط السلايدرات
-      bhSlider.addEventListener('input', (e) => updateBlackHole(e.target.value));
-      nsSlider.addEventListener('input', (e) => updateNeutron(e.target.value));
-      whSlider.addEventListener('input', (e) => updateWhiteHole(e.target.value));
-      
-      // قيم أولية
-      updateBlackHole(50);
-      updateNeutron(50);
-      updateWhiteHole(50);
-
-      // -------------------- نظام السجل --------------------
-      function addToLog(message, type = 'info') {
+      // نظام السجل
+      window.addToLog = function(message, type = 'info') {
         const log = document.getElementById('eventLog');
         const entry = document.createElement('div');
         entry.className = type === 'important' ? 'text-yellow-300 font-bold' : 'text-gray-300';
@@ -102,13 +75,14 @@
         entry.innerHTML = `⏱️ ${timeStr} - ${message}`;
         log.appendChild(entry);
         log.scrollTop = log.scrollHeight;
-        while (log.children.length > 12) log.removeChild(log.children[0]);
-      }
+        while (log.children.length > 8) log.removeChild(log.children[0]);
+      };
+
       window.clearLog = function() {
         document.getElementById('eventLog').innerHTML = '<div class="text-gray-500">✨ تم مسح السجل...</div>';
       };
 
-      // -------------------- دالة الرمي (مدمجة مع السلايدرات) --------------------
+      // دالة الرمي مع دعم اللمس
       window.throwItem = function(zone, itemType) {
         let container, messageDiv, zoneName;
         if (zone === 'blackhole') {
@@ -150,40 +124,52 @@
         messageDiv.innerHTML = `✨ رمي ${finalItem.name}`;
         addToLog(`🎲 رمي ${finalItem.name} في ${zoneName}`);
         
-        // السحب والإسقاط
+        // نظام السحب المتكامل (يدعم الماوس واللمس)
         let isDragging = false;
-        let offsetX, offsetY;
+        let startX, startY, startLeft, startTop;
+        let currentPointerId = null;
         
-        item.addEventListener('mousedown', (e) => {
-          e.preventDefault();
+        const startDrag = (clientX, clientY) => {
           isDragging = true;
+          item.classList.add('touch-dragging');
           const rect = item.getBoundingClientRect();
-          offsetX = e.clientX - rect.left;
-          offsetY = e.clientY - rect.top;
-          item.style.cursor = 'grabbing';
-          item.style.transition = 'none';
-          document.body.style.userSelect = 'none';
-        });
-        
-        const mouseMove = (e) => {
-          if (!isDragging) return;
-          e.preventDefault();
           const containerRect = container.getBoundingClientRect();
-          let x = e.clientX - containerRect.left - offsetX;
-          let y = e.clientY - containerRect.top - offsetY;
-          x = Math.max(0, Math.min(containerRect.width - 50, x));
-          y = Math.max(0, Math.min(containerRect.height - 50, y));
-          item.style.left = (x / containerRect.width * 100) + '%';
-          item.style.top = (y / containerRect.height * 100) + '%';
+          
+          startX = clientX;
+          startY = clientY;
+          startLeft = (rect.left - containerRect.left) / containerRect.width * 100;
+          startTop = (rect.top - containerRect.top) / containerRect.height * 100;
+          
+          item.style.transition = 'none';
+          document.body.style.overflow = 'hidden';
         };
         
-        const mouseUp = (e) => {
+        const moveDrag = (clientX, clientY) => {
+          if (!isDragging) return;
+          
+          const containerRect = container.getBoundingClientRect();
+          const deltaX = clientX - startX;
+          const deltaY = clientY - startY;
+          
+          let newLeft = startLeft + (deltaX / containerRect.width * 100);
+          let newTop = startTop + (deltaY / containerRect.height * 100);
+          
+          newLeft = Math.max(0, Math.min(100, newLeft));
+          newTop = Math.max(0, Math.min(100, newTop));
+          
+          item.style.left = newLeft + '%';
+          item.style.top = newTop + '%';
+        };
+        
+        const endDrag = () => {
           if (!isDragging) return;
           isDragging = false;
-          item.style.cursor = 'grab';
+          item.classList.remove('touch-dragging');
           item.style.transition = 'all 0.3s';
-          document.body.style.userSelect = '';
+          document.body.style.overflow = '';
+          currentPointerId = null;
           
+          // التحقق من الدخول للثقب
           const containerRect = container.getBoundingClientRect();
           const itemRect = item.getBoundingClientRect();
           const centerX = containerRect.left + containerRect.width/2;
@@ -192,7 +178,7 @@
           const itemCenterY = itemRect.top + itemRect.height/2;
           const distance = Math.hypot(itemCenterX - centerX, itemCenterY - centerY);
           
-          if (distance < 70) {
+          if (distance < 80) {
             item.style.pointerEvents = 'none';
             let resultMessage = '', logMsg = '';
             const itemName = finalItem.name;
@@ -220,21 +206,57 @@
           }
         };
         
-        document.addEventListener('mousemove', mouseMove);
-        document.addEventListener('mouseup', mouseUp);
+        // أحداث الماوس
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          startDrag(e.clientX, e.clientY);
+        });
         
+        // أحداث اللمس
+        item.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          currentPointerId = touch.identifier;
+          startDrag(touch.clientX, touch.clientY);
+        }, { passive: false });
+        
+        // حركة الماوس
+        document.addEventListener('mousemove', (e) => {
+          moveDrag(e.clientX, e.clientY);
+        });
+        
+        document.addEventListener('mouseup', endDrag);
+        
+        // حركة اللمس
+        document.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          e.preventDefault();
+          for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === currentPointerId) {
+              moveDrag(e.touches[i].clientX, e.touches[i].clientY);
+              break;
+            }
+          }
+        }, { passive: false });
+        
+        document.addEventListener('touchend', (e) => {
+          if (!isDragging) return;
+          endDrag();
+        });
+        
+        document.addEventListener('touchcancel', endDrag);
+        
+        // حذف تلقائي
         setTimeout(() => {
           if (item.parentNode) {
             item.remove();
-            document.removeEventListener('mousemove', mouseMove);
-            document.removeEventListener('mouseup', mouseUp);
             addToLog(`⌛ ${finalItem.name} ضاع في الفضاء...`);
           }
         }, 20000);
       };
 
-      // -------------------- خلفية نجوم --------------------
-      for (let i = 0; i < 70; i++) {
+      // نجوم الخلفية
+      for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
         s.className = 'star';
         s.style.width = (Math.random()*3+1)+'px';
@@ -245,10 +267,7 @@
         s.style.animation = `twinkle ${Math.random()*5+3}s infinite`;
         document.body.appendChild(s);
       }
-      const style = document.createElement('style');
-      style.innerHTML = '@keyframes twinkle { 0%{opacity:0.2} 50%{opacity:1} 100%{opacity:0.2} }';
-      document.head.appendChild(style);
       
       clearLog();
-      addToLog('🌌 التجربة الكونية الكبرى جاهزة!');
+      addToLog('🌌 مرحباً في الكون! اسحب الأشياء بإصبعك');
     })();
